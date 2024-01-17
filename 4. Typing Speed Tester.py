@@ -4,19 +4,19 @@ import ttkbootstrap as ttk
 
 
 class TypingSpeedTest:
-    def __init__(self, master):
-        self.master = master
-        master.title("The Typing Speed Test")
-        master.geometry('800x600')
-        master.config(padx=20, pady=20)
+    def __init__(self, window):
+        self.master = window
+        window.title("The Typing Speed Test")
+        window.geometry('800x600')
+        window.config(padx=20, pady=20)
 
         # Initialize counts as instance attributes
         self.correct_count = 0
         self.incorrect_count = 0
-
+        # Heading
         self.heading_text = ttk.Label(text="To start the test use the button below", font="Calibri 24 bold")
         self.heading_text.pack()
-
+        # Instructions
         self.instruction_label = ttk.Label(
             text="\n\nOnce the test starts words will appear on screen 📺\n\n"
                  "Once you have typed the word and pressed space or enter the next word will highlight.\n\n"
@@ -26,33 +26,31 @@ class TypingSpeedTest:
         )
         self.instruction_label.pack()
 
-        # BUTTON CLASS - initialise
+        # Button to start test
         self.start_button = ttk.Button(text="Click to Start Test", command=self.test_started)
         self.start_button.pack(pady=50)
-
+        # Time left variable linked to the timer_label
         self.tkinter_time_left = tk.IntVar()
         self.timer_label = ttk.Label(master=self.master, text='1 minute left', textvariable=self.tkinter_time_left)
-
-        # Display random words during the test (placeholder)
+        # Display random words during the test
         self.word_chosen = tk.StringVar()
         self.word_label = ttk.Label(master=self.master,
                                     text='Word',
                                     textvariable=self.word_chosen,
                                     font="Calibri 24 bold")
-
         # User input field
         self.user_input = ttk.Entry(master=self.master, font="Calibri 18")
-
         # Score label
         self.score_label = ttk.Label(master=self.master, text="Score: Correct: 0, Incorrect: 0", font="Arial 16")
 
     def pick_a_word(self):
+        """Function which sets a word from our list as the test of our word_chosen label"""
         chosen_word = random.choice(random_word_list)
         self.word_chosen.set(chosen_word)
 
     def test_started(self):
+        """Sets heading and shows relevant whilst hiding irrelevant widgets"""
         self.heading_text.config(text="Test Started - good luck")
-
         self.instruction_label.pack_forget()
         self.start_button.pack_forget()
         self.timer_start(60)
@@ -62,13 +60,14 @@ class TypingSpeedTest:
         self.user_input.focus_set()
         self.user_input.pack(pady=50)
         self.score_label.pack(pady=50)
-
         # Bind the space key to a function for checking input
         self.master.bind('<space>', self.check_input)
         # Do the same for enter
         self.master.bind('<Return>', self.check_input)
 
     def check_input(self, event):
+        """Triggered by return or enter this checks the word inputted by the user against the word we pulled from 
+        our list. It updates the score attributes accordingly."""
         typed_word = self.user_input.get().strip()
         correct_word = self.word_chosen.get()
 
@@ -78,12 +77,14 @@ class TypingSpeedTest:
         else:
             print("Incorrect!")
             self.incorrect_count += 1
-
+        # Also picks the next word and removes input from input field for next word
         self.pick_a_word()
         self.user_input.delete(0, tk.END)
+        # Updates the scores in-line with updated attributes
         self.update_score_display()
 
     def update_timer(self, time_left):
+        """Updates the timer every 1 second and triggers the end of the game function when reaching 0."""
         if time_left > 0:
             self.tkinter_time_left.set(time_left)
             self.master.after(1000, self.update_timer, time_left - 1)
@@ -92,27 +93,31 @@ class TypingSpeedTest:
             self.game_over()
 
     def timer_start(self, start_val):
+        """Starts the timer"""
         self.tkinter_time_left.set(start_val)
         self.update_timer(start_val)
 
     def update_score_display(self):
+        """Updates the score on our displayed label"""
         self.score_label.config(text=f"Score: Correct: {self.correct_count}, Incorrect: {self.incorrect_count}")
 
     def game_over(self):
+        """Handles end of game hiding of widgets and showing final score etc"""
         self.heading_text.config(text="Test Finished - well done!")
         self.instruction_label.pack_forget()
         self.start_button.pack_forget()
         self.timer_label.pack_forget()
         self.word_label.pack_forget()
         self.user_input.pack_forget()
-        # Restart button
+        # Restart button appears
         self.restart_button = ttk.Button(text="Click to Try again", command=self.reset_test)
         self.restart_button.pack(pady=50)
-        # Unbind key events
+        # Unbind key events to stop score updating
         self.master.unbind('<space>')
         self.master.unbind('<Return>')
 
     def reset_test(self):
+        """Resets all the widgets and variables ready for the test to start again"""
         # Reset counts
         self.correct_count = 0
         self.incorrect_count = 0
@@ -164,6 +169,6 @@ if __name__ == "__main__":
         'bountiful', 'bravery', 'brevity', 'brighten', 'brilliant', 'broaden', 'buoyant', 'calculate'
     ]
 
-    root = tk.Tk()
-    app = TypingSpeedTest(root)
-    root.mainloop()
+    window = tk.Tk()
+    app = TypingSpeedTest(window)
+    window.mainloop()
